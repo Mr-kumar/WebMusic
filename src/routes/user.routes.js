@@ -6,17 +6,17 @@ import { upload } from "../middlewares/multer.middleware.js";
 
 const userRouter = express.Router();
 
-// Define a route for user registration with file uploads
+// Define a route for user registration with specific file upload fields
 userRouter.post(
   "/register",
   upload.fields([
     {
-      name: "avtar", // Assuming "avatar" might be the intended name
-      maxCount: 1,
+      name: "avatar", // Field name for avatar
+      maxCount: 1, // Maximum number of files for this field
     },
     {
-      name: "coverImage", // Assuming "coverImage" is the intended name
-      maxCount: 1,
+      name: "coverImage", // Field name for cover image
+      maxCount: 1, // Maximum number of files for this field
     },
   ]),
   registeruser

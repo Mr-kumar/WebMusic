@@ -43,35 +43,40 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Password is required"],
     },
-
     refreshToken: {
-      type: string,
+      type: String,
     },
   },
   {
     timestamps: true,
   }
 );
-//in this part we use the middleware of the mongoDb database that is use to encrypt the password before savig into the database
 
+// Middleware to hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
+  try {
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
-//again when we have to validate the things when user have login then we have check whether they giving the correct password or not
+
+// Method to validate password
 userSchema.methods.ispasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
-//for generating the jwt for more security
+
+// Method to generate access token
 userSchema.methods.generateAcessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
       email: this.email,
       username: this.username,
-      fullname: fullname,
+      fullname: this.fullname, // Corrected reference
     },
     process.env.ACCESS_TOKEN_SECRET,
     {
@@ -79,6 +84,8 @@ userSchema.methods.generateAcessToken = function () {
     }
   );
 };
+
+// Method to generate refresh token
 userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
@@ -90,5 +97,6 @@ userSchema.methods.generateRefreshToken = function () {
     }
   );
 };
+
 // Export the User model
 export const User = mongoose.model("User", userSchema);
